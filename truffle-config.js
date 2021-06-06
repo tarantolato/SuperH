@@ -47,9 +47,8 @@ module.exports = {
     testnet_kovan: {
       provider: () => providerTestnetKovan,
       network_id: 42,
-      confirmations: 5,
+      confirmations: 10,
       skipDryRun: true,
-      gas: 12487782,
     },
   },
 

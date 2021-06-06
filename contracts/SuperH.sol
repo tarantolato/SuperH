@@ -1,5 +1,5 @@
 
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 // SPDX-License-Identifier: Unlicensed
 
 // We have built a token that will reward you for holding it
@@ -811,8 +811,8 @@ contract SuperHToken is Context, IERC20, Ownable {
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
-        _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
+        _transfer(sender, recipient, amount);
         return true;
     }
 
