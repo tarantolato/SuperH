@@ -31,10 +31,10 @@ module.exports = {
     testnet_bsc: {
       provider: () => providerTestnet,
       network_id: 97,
-      confirmations: 10,
-      timeoutBlocks: 200,
+      confirmations: 3,
+      timeoutBlocks: 600,
       skipDryRun: true,
-      // gas: 3000000000
+      gasLimit:300000
     },
     mainnet_bsc: {
       provider: () => providerMainnet,
@@ -47,9 +47,11 @@ module.exports = {
     testnet_kovan: {
       provider: () => providerTestnetKovan,
       network_id: 42,
-      confirmations: 5,
+      confirmations: 10,
       skipDryRun: true,
-      gas: 12487782,
+      byzantiumBlock:0,
+      imeoutBlocks: 500,
+      //gas: 12500000,
     },
   },
 
@@ -65,7 +67,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.6.12",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.8.4",    // Fetch exact version from solc-bin (default: truffle's version)
       settings: {
         // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
