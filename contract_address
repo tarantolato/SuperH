@@ -26,14 +26,14 @@ Pubblicazione su testnet_bsc
 
    Replacing 'SuperHToken'
    -----------------------
-   > transaction hash:    0x24aeb86fd6bed3fa524e9d526a5db25a43bf300ddc36044977eac993da92cdfb
+   > transaction hash:    0x297874697e11ddd05947264bbe3e1493c707e5955ea6ae7b60f092c1e33394a4
    > Blocks: 3            Seconds: 10
-   > contract address:    0x57043D76cb46D1B68225dD9522419d68c0081fAa
-   > block number:        9318057
-   > block timestamp:     1622451327
+   > contract address:    0x3d719F726f15393BF1cD2986DEE4ffAc47B8C767
+   > block number:        9521853
+   > block timestamp:     1623062820
    > account:             0x0Db4E9C7dFB15bEE706d6212bABB25b0bFf15980
-   > balance:             1.74861789
-   > gas used:            4943927 (0x4b7037)
+   > balance:             2.28395921
+   > gas used:            2403917 (0x24ae4d)
    > gas price:           20 gwei
    > value sent:          0 ETH
-   > total cost:          0.09887854 ETH
+   > total cost:          0.04807834 ETH
