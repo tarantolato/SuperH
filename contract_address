@@ -5,17 +5,17 @@ Pubblicazione su mainnet_bsc
 
    Deploying 'SuperHToken'
    -----------------------
-   > transaction hash:    0x9d2985c65cf2b2af39c8b9fa253cbe050e1c202ba8a98066662aea47358e3a11
-   > Blocks: 3            Seconds: 8
-   > contract address:    0x498787C7E517D90202da2FAB59A898233631fdb7
-   > block number:        7841512
-   > block timestamp:     1622323389
+   > transaction hash:    0x591fb5df5679dcb48e05b0b09a604aec57f1fc1c06d9946dc781ed51e59572b8
+   > Blocks: 3            Seconds: 13
+   > contract address:    0xa7f7A25e9e681ceC5F8E002ce869A60dcE686b49
+   > block number:        8093101
+   > block timestamp:     1623080335
    > account:             0x0Db4E9C7dFB15bEE706d6212bABB25b0bFf15980
-   > balance:             0.097121704745508837
-   > gas used:            6211421 (0x5ec75d)
+   > balance:             0.445126362278099842
+   > gas used:            2403917 (0x24ae4d)
    > gas price:           20 gwei
    > value sent:          0 ETH
-   > total cost:          0.12422842 ETH
+   > total cost:          0.04807834 ETH
 
 //////////////////////////////////////////////////////////////////////////
 

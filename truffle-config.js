@@ -26,7 +26,7 @@ module.exports = {
     testnet_bsc: {
       provider: () => providerTestnet,
       network_id: 97,
-      confirmations: 3,
+      confirmations: 10,
       timeoutBlocks: 600,
       skipDryRun: true,
       gasLimit:300000
@@ -35,9 +35,9 @@ module.exports = {
       provider: () => providerMainnet,
       network_id: 56,
       confirmations: 10,
-      timeoutBlocks: 500,
+      timeoutBlocks: 600,
       skipDryRun: true,
-      // gas: 3000000000
+      gasLimit:300000
     },
   },
 
