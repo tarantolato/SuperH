@@ -37,3 +37,24 @@ Pubblicazione su testnet_bsc
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.04807834 ETH
+
+///////////////////////////////////////////////////////////////////////////
+
+Pubblicazione su rete testnet_kovan
+
+2_deploy_SuperH.js
+==================
+
+   Replacing 'SuperHToken'
+   -----------------------
+   > transaction hash:    0x694836c4858b7c64c47d962c3c08253569e3724ebea98d83ede4d96687d8fe7a
+   > Blocks: 1            Seconds: 5
+   > contract address:    0xf35dB2daBCba128E307D7a856E7fB02a70F0d145
+   > block number:        25345167
+   > block timestamp:     1623164656
+   > account:             0x0Db4E9C7dFB15bEE706d6212bABB25b0bFf15980
+   > balance:             10.360196998
+   > gas used:            2432717 (0x251ecd)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.04865434 ETH

@@ -11,6 +11,11 @@ const secretKeyMainnet = fs.readFileSync(".secretKeyMainnet").toString().trim();
 const endpointMainnet = 'https://bsc-dataseed1.ninicoin.io/';
 const providerMainnet = new HDWalletProvider([secretKeyMainnet], endpointMainnet);
 
+// Configurazione rete Testnet Kovan
+const secretKeyTestnetKovan = fs.readFileSync(".secretKeyTestnetKovan").toString().trim();
+const endpointTestnetKovan = 'https://kovan.infura.io/v3/7e31a4e6cb394a6fa9f4b8d1a710bd9e';
+const providerTestnetKovan = new HDWalletProvider([secretKeyTestnetKovan], endpointTestnetKovan);
+
 module.exports = {
   networks: {
     development: {
@@ -38,6 +43,14 @@ module.exports = {
       timeoutBlocks: 600,
       skipDryRun: true,
       gasLimit:300000
+    },
+    testnet_kovan: {
+      provider: () => providerTestnetKovan,
+      network_id: 42,
+      confirmations: 10,
+      timeoutBlocks: 600,
+      skipDryRun: true,
+      gasLimit:500000
     },
   },
 

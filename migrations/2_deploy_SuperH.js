@@ -3,7 +3,5 @@ const blockLimit = 7000000;
 module.exports = async function(deployer) {
    await deployer.deploy(SuperHToken);
    const superHToken = await SuperHToken.deployed();
-
-
    console.log("SuperHToken: ",superHToken.address);
 };
