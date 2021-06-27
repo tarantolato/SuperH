@@ -38,6 +38,27 @@ Pubblicazione su testnet_bsc
    > value sent:          0 ETH
    > total cost:          0.04807834 ETH
 
+//////////////////////////////////////////////////////////////////////////
+
+   Pubblicazione su testnet2_bsc
+
+   2_deploy_SuperH.js
+   ==================
+
+      Replacing 'SuperHToken'
+      -----------------------
+      > transaction hash:    0x6567db574e6e2e6a0c489d27afa81ed6a3f1458403d6f2ec9a9430e3c0f3173d
+      > Blocks: 2            Seconds: 8
+      > contract address:    0xEaCB86f1F9Eecae67B1E4bc306d83a954026fcae
+      > block number:        8313615
+      > block timestamp:     1623745931
+      > account:             0x0Db4E9C7dFB15bEE706d6212bABB25b0bFf15980
+      > balance:             0.561773873926505667
+      > gas used:            2442483 (0x2544f3)
+      > gas price:           20 gwei
+      > value sent:          0 ETH
+      > total cost:          0.04884966 ETH
+
 ///////////////////////////////////////////////////////////////////////////
 
 Pubblicazione su rete testnet_kovan
@@ -58,3 +79,24 @@ Pubblicazione su rete testnet_kovan
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.04865434 ETH
+
+   ///////////////////////////////////////////////////////////////////////////
+
+   Pubblicazione2 su rete testnet_kovan
+
+   2_deploy_SuperH.js
+   ==================
+
+      Replacing 'SuperHToken'
+      -----------------------
+      > transaction hash:    0x4fbf10f63d7fbc485899ca3540d054244f3d91cb1e533bf2ac64c19ad9889111
+      > Blocks: 1            Seconds: 4
+      > contract address:    0xfa7C7f87310691f5720502436c425FD67Ad215e1
+      > block number:        25368338
+      > block timestamp:     1623257400
+      > account:             0x0Db4E9C7dFB15bEE706d6212bABB25b0bFf15980
+      > balance:             7.5185797
+      > gas used:            2432717 (0x251ecd)
+      > gas price:           20 gwei
+      > value sent:          0 ETH
+      > total cost:          0.04865434 ETH
