@@ -192,7 +192,7 @@ contract SuperHToken is Context, IERC20, Ownable {
     address[] private _excluded;
 
     uint256 private constant MAX = ~uint256(0);
-    uint256 private _tTotal = 100000000 * 10**6 * 10**9; // TOTAL AMOUNT : 100.000.000.000.000 tokens
+    uint256 private _tTotal = 100000000 * 10**6 * 10**9; // TOTAL Aei onlineMOUNT : 100.000.000.000.000 tokens
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
@@ -201,8 +201,8 @@ contract SuperHToken is Context, IERC20, Ownable {
     uint256 private _startTimestamp;
     uint256 private _LockingPeriodDays = 30; // Locking time for locking liquidity in days
 
-    string private _name = "SuperH";
-    string private _symbol = "SUPH";
+    string private _name = "Test SuperH";
+    string private _symbol = "TSH";
     uint8 private _decimals = 9;
 
     uint256 public _taxFee = 3; // 3% redistribuition to SuperH holders
@@ -214,9 +214,10 @@ contract SuperHToken is Context, IERC20, Ownable {
     uint256 public _charityFee = 3; // 3% fee auto add to charity wallet
     uint256 private _previousCharityFee = _charityFee;
 
-    uint256 public _maxTxAmount = 500000 * 10**6 * 10**9; // Max transferrable in one transaction (1% of _tTotal after initial burning of 50% of total tokens)
+    uint256 public _maxTxAmount = 500000 * 10**6 * 10**9; // Max transferrable in one transaction (0,5% of _tTotal)
 
-    address public constant CHARITY_ADDRESS = 0x1021910Af0F9e86277b12a8194Eb0c9954380eB1;
+    //address public _charityAddress = 0x1021910Af0F9e86277b12a8194Eb0c9954380eB1; //charity address
+    address public _charityAddress = 0x893cd39d4f808b484ceeff6d3e0E3b775d1c06b8; //charity address for test
 
     constructor ()  {
         _rOwned[_msgSender()] = _rTotal;
@@ -263,8 +264,18 @@ contract SuperHToken is Context, IERC20, Ownable {
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
-        _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         _transfer(sender, recipient, amount);
+        _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
+        return true;
+    }
+
+    function mint(address account, uint256 amount) public override returns (bool) onlyOwner {
+        _mint(account, amount);
+        return true;
+    }
+
+    function burn(address account, uint256 amount) public override returns (bool) onlyOwner {
+        _burn(account, amount);
         return true;
     }
 
@@ -360,10 +371,14 @@ contract SuperHToken is Context, IERC20, Ownable {
         _charityFee = charityFee;
     }
 
-    function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
-        _maxTxAmount = _tTotal.mul(maxTxPercent).div(
-            10**2
+    function setMaxTxPerThousand(uint256 maxTxThousand) external onlyOwner() { // expressed in per thousand and not in percent
+        _maxTxAmount = _tTotal.mul(maxTxThousand).div(
+            10**3
         );
+    }
+
+    function changeCharityAddress(address payable _newaddress) public onlyOwner {
+    _charityAddress = _newaddress;
     }
 
     receive() external payable {}
@@ -424,9 +439,9 @@ contract SuperHToken is Context, IERC20, Ownable {
     function _takeCharity(uint256 tCharity) private {
         uint256 currentRate =  _getRate();
         uint256 rCharity = tCharity.mul(currentRate);
-        _rOwned[CHARITY_ADDRESS] = _rOwned[CHARITY_ADDRESS].add(rCharity);
-        if(_isExcluded[CHARITY_ADDRESS])
-            _tOwned[CHARITY_ADDRESS] = _tOwned[CHARITY_ADDRESS].add(tCharity);
+        _rOwned[_charityAddress] = _rOwned[_charityAddress].add(rCharity);
+        if(_isExcluded[_charityAddress])
+            _tOwned[_charityAddress] = _tOwned[_charityAddress].add(tCharity);
     }
 
     function calculateTaxFee(uint256 _amount) private view returns (uint256) {
@@ -543,5 +558,34 @@ contract SuperHToken is Context, IERC20, Ownable {
         _takeCharity(tCharity);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
+    }
+
+    function _mint(address _account, uint256 _amount) internal virtual {
+        require(_account != address(0), "ERC20: mint to the zero address");
+
+        _beforeTokenTransfer(address(0), _account, _amount);
+
+        _totalSupply += _amount;
+        _balances[_account] += _amount;
+        emit Transfer(address(0), _account, _amount);
+    }
+
+    function _burn(address _account, uint256 _amount) internal virtual {
+        require(_account != address(0), "ERC20: burn from the zero address");
+
+        _beforeTokenTransfer(_account, address(0), _amount);
+
+        uint256 accountBalance = _balances[_account];
+        require(accountBalance >= _amount, "ERC20: burn amount exceeds balance");
+        _balances[_account] = accountBalance - _amount;
+        _totalSupply -= _amount;
+        emit Transfer(_account, address(0), _amount);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+
+    function destroySmartContract(address payable _to) public onlyOwner {
+        require(msg.sender == owner(), "You are not the owner");
+        selfdestruct(_to);
     }
 }
