@@ -1,12 +1,9 @@
+/**
+ *Submitted for verification at BscScan.com on 2021-06-07
+*/
+
 pragma solidity ^0.8.4;
 // SPDX-License-Identifier: Unlicensed
-// --------------- da testare -------------------
-// changeCharityAddress, burn, mint, totalAntiDipFees
-// setAntiDipFeePercent, setFeePercent, destroySmartContract
-// excludeFromAntiDipFee, includeInAntiDipFee, setAntiDipFeePercent
-// removeAllAntiDipFee, restoreAllAntiDipFee, isExcludedFromAntiDipFee
-// calculateAntiDipFee,
-
 
 interface IERC20 {
 
@@ -194,28 +191,23 @@ contract SuperHToken is Context, IERC20, Ownable {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     mapping (address => bool) private _isExcludedFromFee;
-    mapping (address => bool) private _isExcludedFromAntiDipFee;
 
-    mapping (address => bool) private _isExcludedFromRewards;
-    address[] private _excludedFromRewards;
+    mapping (address => bool) private _isExcluded;
+    address[] private _excluded;
 
     uint256 private constant MAX = ~uint256(0);
-    uint256 private _tTotal = 100000000 * 10**6 * 10**9; // TOTAL Aei onlineMOUNT : 100.000.000.000.000 tokens
+    uint256 private _tTotal = 100000000 * 10**6 * 10**9; // TOTAL AMOUNT : 100.000.000.000.000 tokens
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
-    uint256 private _tAntiDipFeeTotal;
 
     uint256 private constant MONTH = 2628000; // 31536000/12 ;
     uint256 private constant DAYS = 86400; // 31536000/365 ;
     uint256 private _startTimestamp;
     uint256 private _LockingPeriodDays = 30; // Locking time for locking liquidity in days
 
-    string private _name = "Test SuperH";
-    string private _symbol = "TSH";
+    string private _name = "SuperH";
+    string private _symbol = "SUPH";
     uint8 private _decimals = 9;
-
-    uint256 public _antiDipFee = 0; // variable% taxation in BNB to avoid dips
-    uint256 private _previousantiDipFee = _antiDipFee;
 
     uint256 public _taxFee = 3; // 3% redistribuition to SuperH holders
     uint256 private _previousTaxFee = _taxFee;
@@ -226,19 +218,16 @@ contract SuperHToken is Context, IERC20, Ownable {
     uint256 public _charityFee = 3; // 3% fee auto add to charity wallet
     uint256 private _previousCharityFee = _charityFee;
 
-    uint256 public _maxTxAmount = 500000 * 10**6 * 10**9; // Max transferrable in one transaction (0,5% of _tTotal)
+    uint256 public _maxTxAmount = 500000 * 10**6 * 10**9; // Max transferrable in one transaction (1% of _tTotal after initial burning of 50% of total tokens)
 
-    address public _charityAddress = 0x0000000000000000000000000000000000000000; // Charity address
-    address public _antiDipAddress = 0x0000000000000000000000000000000000000000; // Anti Dip address
+    address public constant CHARITY_ADDRESS = 0x1021910Af0F9e86277b12a8194Eb0c9954380eB1;
 
     constructor ()  {
         _rOwned[_msgSender()] = _rTotal;
         //exclude owner and this contract from fee
         _isExcludedFromFee[owner()] = true;
         _isExcludedFromFee[address(this)] = true;
-        //exclude owner and this contract from Anti Dip fee
-        _isExcludedFromAntiDipFee[owner()] = true;
-        _isExcludedFromAntiDipFee[address(this)] = true;
+
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 
@@ -259,7 +248,7 @@ contract SuperHToken is Context, IERC20, Ownable {
     }
 
     function balanceOf(address account) public view override returns (uint256) {
-        if (_isExcludedFromRewards[account]) return _tOwned[account];
+        if (_isExcluded[account]) return _tOwned[account];
         return tokenFromReflection(_rOwned[account]);
     }
 
@@ -278,18 +267,8 @@ contract SuperHToken is Context, IERC20, Ownable {
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
-        _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
-        return true;
-    }
-
-    function mint(address account, uint256 amount) public override returns (bool) onlyOwner {
-        _mint(account, amount);
-        return true;
-    }
-
-    function burn(address account, uint256 amount) public override returns (bool) onlyOwner {
-        _burn(account, amount);
+        _transfer(sender, recipient, amount);
         return true;
     }
 
@@ -304,27 +283,23 @@ contract SuperHToken is Context, IERC20, Ownable {
     }
 
     function isExcludedFromReward(address account) public view returns (bool) {
-        return _isExcludedFromRewards[account];
+        return _isExcluded[account];
     }
 
     function totalFees() public view returns (uint256) {
         return _tFeeTotal;
     }
 
-    function totalAntiDipFees() public view returns (uint256) {
-        return _tAntiDipFeeTotal;
-    }
-
-    /* function deliver(uint256 tAmount) public {
+    function deliver(uint256 tAmount) public {
         address sender = _msgSender();
-        require(!_isExcludedFromRewards[sender], "Excluded addresses cannot call this function");
+        require(!_isExcluded[sender], "Excluded addresses cannot call this function");
         (uint256 rAmount,,,,,,) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rTotal = _rTotal.sub(rAmount);
         _tFeeTotal = _tFeeTotal.add(tAmount);
-    } */
+    }
 
-    /* function reflectionFromToken(uint256 tAmount, bool deductTransferFee) public view returns(uint256) {
+    function reflectionFromToken(uint256 tAmount, bool deductTransferFee) public view returns(uint256) {
         require(tAmount <= _tTotal, "Amount must be less than supply");
         if (!deductTransferFee) {
             (uint256 rAmount,,,,,,) = _getValues(tAmount);
@@ -333,7 +308,7 @@ contract SuperHToken is Context, IERC20, Ownable {
             (,uint256 rTransferAmount,,,,,) = _getValues(tAmount);
             return rTransferAmount;
         }
-    } */
+    }
 
     function tokenFromReflection(uint256 rAmount) public view returns(uint256) {
         require(rAmount <= _rTotal, "Amount must be less than total reflections");
@@ -341,24 +316,24 @@ contract SuperHToken is Context, IERC20, Ownable {
         return rAmount.div(currentRate);
     }
 
-    function excludeFromReward(address account) public onlyOwner {
+    function excludeFromReward(address account) public onlyOwner() {
         // require(account != 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, 'We can not exclude Uniswap router.');
-        require(!_isExcludedFromRewards[account], "Account is already excluded");
+        require(!_isExcluded[account], "Account is already excluded");
         if(_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
         }
-        _isExcludedFromRewards[account] = true;
-        _excludedFromRewards.push(account);
+        _isExcluded[account] = true;
+        _excluded.push(account);
     }
 
-    function includeInReward(address account) external onlyOwner {
-        require(_isExcludedFromRewards[account], "Account is already excluded");
-        for (uint256 i = 0; i < _excludedFromRewards.length; i++) {
-            if (_excludedFromRewards[i] == account) {
-                _excludedFromRewards[i] = _excludedFromRewards[_excludedFromRewards.length - 1];
+    function includeInReward(address account) external onlyOwner() {
+        require(_isExcluded[account], "Account is already excluded");
+        for (uint256 i = 0; i < _excluded.length; i++) {
+            if (_excluded[i] == account) {
+                _excluded[i] = _excluded[_excluded.length - 1];
                 _tOwned[account] = 0;
-                _isExcludedFromRewards[account] = false;
-                _excludedFromRewards.pop();
+                _isExcluded[account] = false;
+                _excluded.pop();
                 break;
             }
         }
@@ -383,36 +358,16 @@ contract SuperHToken is Context, IERC20, Ownable {
         _isExcludedFromFee[account] = false;
     }
 
-    function excludeFromAntiDipFee(address account) public onlyOwner {
-        _isExcludedFromAntiDipFee[account] = true;
-    }
-
-    function includeInAntiDipFee(address account) public onlyOwner {
-        _isExcludedFromAntiDipFee[account] = false;
-    }
-
-    function setFeePercent(uint256 taxFee, uint256 liquidityFee, uint256 charityFee) external onlyOwner {
+    function setFeePercent(uint256 taxFee, uint256 liquidityFee, uint256 charityFee) external onlyOwner() {
         _taxFee = taxFee;
         _liquidityFee = liquidityFee;
         _charityFee = charityFee;
     }
 
-    function setAntiDipFeePercent(uint256 antiDipFee) external onlyOwner {
-        _antiDipFee = antiDipFee;
-    }
-
-    function setMaxTxPerThousand(uint256 maxTxThousand) external onlyOwner { // expressed in per thousand and not in percent
-        _maxTxAmount = _tTotal.mul(maxTxThousand).div(
-            10**3
+    function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
+        _maxTxAmount = _tTotal.mul(maxTxPercent).div(
+            10**2
         );
-    }
-
-    function changeCharityAddress(address payable _newaddress) public onlyOwner {
-    _charityAddress = _newaddress;
-    }
-
-    function changeAntiDipAddress(address payable _newaddress) public onlyOwner {
-    _antiDipAddress = _newaddress;
     }
 
     receive() external payable {}
@@ -420,6 +375,12 @@ contract SuperHToken is Context, IERC20, Ownable {
     function _reflectFee(uint256 rFee, uint256 tFee) private {
         _rTotal = _rTotal.sub(rFee);
         _tFeeTotal = _tFeeTotal.add(tFee);
+    }
+
+    function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
+        (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tCharity) = _getTValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, tCharity, _getRate());
+        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity, tCharity);
     }
 
     function _getTValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256) {
@@ -439,12 +400,6 @@ contract SuperHToken is Context, IERC20, Ownable {
         return (rAmount, rTransferAmount, rFee);
     }
 
-    function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
-        (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tCharity) = _getTValues(tAmount);
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, tCharity, _getRate());
-        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity, tCharity);
-    }
-
     function _getRate() private view returns(uint256) {
         (uint256 rSupply, uint256 tSupply) = _getCurrentSupply();
         return rSupply.div(tSupply);
@@ -453,10 +408,10 @@ contract SuperHToken is Context, IERC20, Ownable {
     function _getCurrentSupply() private view returns(uint256, uint256) {
         uint256 rSupply = _rTotal;
         uint256 tSupply = _tTotal;
-        for (uint256 i = 0; i < _excludedFromRewards.length; i++) {
-            if (_rOwned[_excludedFromRewards[i]] > rSupply || _tOwned[_excludedFromRewards[i]] > tSupply) return (_rTotal, _tTotal);
-            rSupply = rSupply.sub(_rOwned[_excludedFromRewards[i]]);
-            tSupply = tSupply.sub(_tOwned[_excludedFromRewards[i]]);
+        for (uint256 i = 0; i < _excluded.length; i++) {
+            if (_rOwned[_excluded[i]] > rSupply || _tOwned[_excluded[i]] > tSupply) return (_rTotal, _tTotal);
+            rSupply = rSupply.sub(_rOwned[_excluded[i]]);
+            tSupply = tSupply.sub(_tOwned[_excluded[i]]);
         }
         if (rSupply < _rTotal.div(_tTotal)) return (_rTotal, _tTotal);
         return (rSupply, tSupply);
@@ -466,24 +421,16 @@ contract SuperHToken is Context, IERC20, Ownable {
         uint256 currentRate =  _getRate();
         uint256 rLiquidity = tLiquidity.mul(currentRate);
         _rOwned[address(this)] = _rOwned[address(this)].add(rLiquidity);
-        if(_isExcludedFromRewards[address(this)])
+        if(_isExcluded[address(this)])
             _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
     }
 
     function _takeCharity(uint256 tCharity) private {
         uint256 currentRate =  _getRate();
         uint256 rCharity = tCharity.mul(currentRate);
-        _rOwned[_charityAddress] = _rOwned[_charityAddress].add(rCharity);
-        if(_isExcludedFromRewards[_charityAddress])
-            _tOwned[_charityAddress] = _tOwned[_charityAddress].add(tCharity);
-    }
-
-    function _takeAntiDip(uint256 tAntiDip) private {
-        // uint256 currentRate =  _getRate();
-        // uint256 rAntiDip = tAntiDip.mul(currentRate);
-        // _rOwned[_antiDipAddress] = _rOwned[_antiDipAddress].add(rAntiDip);
-        // if(_isExcludedFromRewards[_antiDipAddress])
-            // _tOwned[_antiDipAddress] = _tOwned[_antiDipAddress].add(tAntiDip);
+        _rOwned[CHARITY_ADDRESS] = _rOwned[CHARITY_ADDRESS].add(rCharity);
+        if(_isExcluded[CHARITY_ADDRESS])
+            _tOwned[CHARITY_ADDRESS] = _tOwned[CHARITY_ADDRESS].add(tCharity);
     }
 
     function calculateTaxFee(uint256 _amount) private view returns (uint256) {
@@ -498,11 +445,6 @@ contract SuperHToken is Context, IERC20, Ownable {
         return _amount.mul(_charityFee).div(10**2);
     }
 
-    function calculateAntiDipFee(uint256 _amount) private view returns (uint256) {
-        return _amount.mul(_antiDipFee).div(10**2);
-    }
-
-
     function removeAllFee() private {
         if(_taxFee == 0 && _liquidityFee == 0 && _charityFee == 0) return;
 
@@ -515,33 +457,20 @@ contract SuperHToken is Context, IERC20, Ownable {
         _charityFee = 0;
     }
 
-    function removeAllAntiDipFee() private {
-        if(_antiDipFee == 0) return;
-        _previousantiDipFee = _antiDipFee;
-        _antiDipFee = 0;
-    }
-
     function restoreAllFee() private {
         _taxFee = _previousTaxFee;
         _liquidityFee = _previousLiquidityFee;
         _charityFee = _previousCharityFee;
     }
 
-    function restoreAllAntiDipFee() private {
-        _antiDipFee = _previousantiDipFee;
-    }
-
     function isExcludedFromFee(address account) public view returns(bool) {
         return _isExcludedFromFee[account];
-    }
-
-    function isExcludedFromAntiDipFee(address account) public view returns(bool) {
-        return _isExcludedFromAntiDipFee[account];
     }
 
     function _approve(address owner, address spender, uint256 amount) private {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
+
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
@@ -559,6 +488,7 @@ contract SuperHToken is Context, IERC20, Ownable {
 
         //indicates if fee should be deducted from transfer
         bool takeFee = true;
+
         if(_isExcludedFromFee[from] || _isExcludedFromFee[to]){
             takeFee = false;
         }
@@ -571,13 +501,13 @@ contract SuperHToken is Context, IERC20, Ownable {
         if(!takeFee)
             removeAllFee();
 
-        if (_isExcludedFromRewards[sender] && !_isExcludedFromRewards[recipient]) {
+        if (_isExcluded[sender] && !_isExcluded[recipient]) {
             _transferFromExcluded(sender, recipient, amount);
-        } else if (!_isExcludedFromRewards[sender] && _isExcludedFromRewards[recipient]) {
+        } else if (!_isExcluded[sender] && _isExcluded[recipient]) {
             _transferToExcluded(sender, recipient, amount);
-        } else if (!_isExcludedFromRewards[sender] && !_isExcludedFromRewards[recipient]) {
+        } else if (!_isExcluded[sender] && !_isExcluded[recipient]) {
             _transferStandard(sender, recipient, amount);
-        } else if (_isExcludedFromRewards[sender] && _isExcludedFromRewards[recipient]) {
+        } else if (_isExcluded[sender] && _isExcluded[recipient]) {
             _transferBothExcluded(sender, recipient, amount);
         } else {
             _transferStandard(sender, recipient, amount);
@@ -617,34 +547,5 @@ contract SuperHToken is Context, IERC20, Ownable {
         _takeCharity(tCharity);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
-    }
-
-    function _mint(address _account, uint256 _amount) internal virtual {
-        require(_account != address(0), "ERC20: mint to the zero address");
-
-        _beforeTokenTransfer(address(0), _account, _amount);
-
-        _totalSupply += _amount;
-        _balances[_account] += _amount;
-        emit Transfer(address(0), _account, _amount);
-    }
-
-    function _burn(address _account, uint256 _amount) internal virtual {
-        require(_account != address(0), "ERC20: burn from the zero address");
-
-        _beforeTokenTransfer(_account, address(0), _amount);
-
-        uint256 accountBalance = _balances[_account];
-        require(accountBalance >= _amount, "ERC20: burn amount exceeds balance");
-        _balances[_account] = accountBalance - _amount;
-        _totalSupply -= _amount;
-        emit Transfer(_account, address(0), _amount);
-    }
-
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
-
-    function destroySmartContract(address payable _to) public onlyOwner {
-        require(msg.sender == owner(), "You are not the owner");
-        selfdestruct(_to);
     }
 }
